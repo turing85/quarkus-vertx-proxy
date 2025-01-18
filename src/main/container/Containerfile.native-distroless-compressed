@@ -1,0 +1,40 @@
+ARG COMPRESSOR_IMAGE="docker.io/alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcffe38ed51099"
+ARG DISTROLESS_IMAGE="quay.io/quarkus/quarkus-distroless-image:2.0-2024-12-29@sha256:5cead26d2ffeed26ee830bdcd829e8e9a56f03879bae35031e4e8fb93e7cffc2"
+
+FROM ${COMPRESSOR_IMAGE} AS compressor
+ARG UPX_INSTALLATION_COMMAND="apk add \
+    libgcc=14.2.0-r4 \
+    libstdc++=14.2.0-r4 \
+    upx=4.2.4-r0 \
+  && rm -rf /var/cache/apt/*"
+ARG UPX_COMPRESSION_MODE="--fast"
+
+USER root
+WORKDIR /project
+RUN eval "${UPX_INSTALLATION_COMMAND}"
+COPY \
+  --chmod=700 \
+  target/*-runner /project/application
+RUN upx \
+  "${UPX_COMPRESSION_MODE}" \
+  -o application-compressed \
+  application
+
+FROM ${DISTROLESS_IMAGE} as runner
+ARG APP_DIR=/deployment
+ARG UID=1001
+
+USER root
+WORKDIR ${APP_DIR}
+# Include if the project has .so that need to be copied:
+# COPY \
+#  --chmod=444 \
+#  target/*.so /lib/
+COPY \
+  --from=compressor \
+  --chmod=111 \
+   /project/application-compressed ${APP_DIR}/application
+
+ENV LANGUAGE='en_US:en'
+USER ${UID}:${UID}
+ENTRYPOINT [ "./application" ]
