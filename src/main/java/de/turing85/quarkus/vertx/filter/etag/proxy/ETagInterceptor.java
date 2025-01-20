@@ -49,12 +49,13 @@ class ETagInterceptor implements ProxyInterceptor {
   }
 
   private Future<Void> generateAndHandleETag(ProxyContext context) {
-    // @formatter:off
     ReadStream<Buffer> bodyStream = context.response().getBody().stream().pause();
-    return HashingHelper.create("MD5", vertx)
-                    .compose(helper -> helper.process(bodyStream)
-                            .compose(unused-> handleETagFromHelper(context, helper))
-                            .onComplete(unused -> helper.close()));
+    // @formatter:off
+    return HashingHelper.of("MD5", vertx)
+        .compose(helper -> helper
+            .process(bodyStream)
+            .compose(unused-> handleETagFromHelper(context, helper))
+            .onComplete(unused -> helper.close()));
     // @formatter:on
   }
 
@@ -62,11 +63,6 @@ class ETagInterceptor implements ProxyInterceptor {
     final String eTag =
         "\"%s\"".formatted(DatatypeConverter.printHexBinary(helper.digest()).toLowerCase());
     context.response().putHeader(HttpHeaders.ETAG, eTag);
-    return handleETagFromHelper(context, helper, eTag);
-  }
-
-  private static Future<Void> handleETagFromHelper(ProxyContext context, HashingHelper helper,
-      String eTag) {
     final Set<String> ifNoneMatch = extractIfNoneMatchHeader(context);
     if (ifNoneMatch.contains(eTag)) {
       setReturnAsNotChanged(context);

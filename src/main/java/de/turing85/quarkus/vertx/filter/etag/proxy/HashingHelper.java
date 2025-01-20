@@ -12,7 +12,6 @@ import io.vertx.core.file.OpenOptions;
 import io.vertx.core.streams.ReadStream;
 
 class HashingHelper {
-
   private final MessageDigest digest;
   private final Vertx vertx;
   private final String path;
@@ -25,16 +24,22 @@ class HashingHelper {
     this.file = file;
   }
 
-  static Future<HashingHelper> create(String algorithm, Vertx vertx) {
-    MessageDigest digest;
+  static Future<HashingHelper> of(String algorithm, Vertx vertx) {
+    final MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(algorithm);
     } catch (NoSuchAlgorithmException e) {
       return Future.failedFuture(e);
     }
-    return vertx.fileSystem().createTempFile("vertx-etag-hash-", ".tmp")
-        .compose(path -> vertx.fileSystem().open(path, new OpenOptions().setDeleteOnClose(true))
+
+    // @formatter:off
+    return vertx.fileSystem()
+        .createTempFile("vertx-etag-hash-", ".tmp")
+        .compose(path -> vertx
+            .fileSystem()
+            .open(path, new OpenOptions().setDeleteOnClose(true))
             .map(asyncFile -> new HashingHelper(digest, vertx, path, asyncFile)));
+    // @formatter:on
   }
 
   AsyncFile file() {
@@ -46,25 +51,24 @@ class HashingHelper {
   }
 
   Future<Void> process(ReadStream<Buffer> bodyStream) {
-    Promise<Void> promise = Promise.promise();
-
+    final Promise<Void> promise = Promise.promise();
     // @formatter:off
-        bodyStream
-                .exceptionHandler(promise::tryFail)
-                .endHandler(promise::tryComplete)
-                .handler(data -> {
-                    digest.update(data.getBytes());
-                    file.write(data);
-                    if (file.writeQueueFull()) {
-                        bodyStream.pause();
-                        file.drainHandler(v -> bodyStream.resume());
-                    }
-                });
-        // @formatter:on
-
+    bodyStream
+        .exceptionHandler(promise::tryFail)
+        .endHandler(promise::tryComplete)
+        .handler(data -> handleBuffer(data, bodyStream));
+    // @formatter:on
     bodyStream.resume();
-
     return promise.future();
+  }
+
+  private void handleBuffer(Buffer data, ReadStream<Buffer> bodyStream) {
+    digest.update(data.getBytes());
+    file.write(data);
+    if (file.writeQueueFull()) {
+      bodyStream.pause();
+      file.drainHandler(v -> bodyStream.resume());
+    }
   }
 
   void close() {
