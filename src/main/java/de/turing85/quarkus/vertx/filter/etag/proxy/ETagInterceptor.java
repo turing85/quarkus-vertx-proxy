@@ -11,7 +11,9 @@ import jakarta.xml.bind.DatatypeConverter;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.streams.ReadStream;
 import io.vertx.httpproxy.Body;
 import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
@@ -47,34 +49,29 @@ class ETagInterceptor implements ProxyInterceptor {
   }
 
   private Future<Void> generateAndHandleETag(ProxyContext context) {
-    try {
-      final HashingWriteStream write = new HashingWriteStream("MD5", vertx);
-      // @formatter:off
-      return context.response().getBody().stream()
-          .pipeTo(write)
-          .compose(unused -> handleETagFromWriter(context, write))
-          .onComplete(unused -> write.close());
-      // @formatter:on
-    } catch (Exception e) {
-      return Future.failedFuture(e);
-    }
+    // @formatter:off
+    ReadStream<Buffer> bodyStream = context.response().getBody().stream().pause();
+    return HashingHelper.create("MD5", vertx)
+                    .compose(helper -> helper.process(bodyStream)
+                            .compose(unused-> handleETagFromHelper(context, helper))
+                            .onComplete(unused -> helper.close()));
+    // @formatter:on
   }
 
-  private Future<Void> handleETagFromWriter(ProxyContext context, HashingWriteStream writer) {
+  private Future<Void> handleETagFromHelper(ProxyContext context, HashingHelper helper) {
     final String eTag =
-        "\"%s\"".formatted(DatatypeConverter.printHexBinary(writer.digest()).toLowerCase());
+        "\"%s\"".formatted(DatatypeConverter.printHexBinary(helper.digest()).toLowerCase());
     context.response().putHeader(HttpHeaders.ETAG, eTag);
-    return handleETagFromWriter(context, writer, eTag);
+    return handleETagFromHelper(context, helper, eTag);
   }
 
-  private static Future<Void> handleETagFromWriter(ProxyContext context, HashingWriteStream writer,
+  private static Future<Void> handleETagFromHelper(ProxyContext context, HashingHelper helper,
       String eTag) {
     final Set<String> ifNoneMatch = extractIfNoneMatchHeader(context);
     if (ifNoneMatch.contains(eTag)) {
       setReturnAsNotChanged(context);
-      writer.close();
     } else {
-      context.response().setBody(Body.body(writer.content()));
+      context.response().setBody(Body.body(helper.file()));
     }
     return context.sendResponse();
   }
