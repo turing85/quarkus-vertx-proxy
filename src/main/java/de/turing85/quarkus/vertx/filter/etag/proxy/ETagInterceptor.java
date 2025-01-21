@@ -86,7 +86,7 @@ class ETagInterceptor implements ProxyInterceptor {
   private static void setReturnAsNotChanged(ProxyContext context) {
     // @formatter:off
     context.response()
-        .setBody(null)
+        .setBody(Body.body(Buffer.buffer()))
         .setStatusCode(Response.Status.NOT_MODIFIED.getStatusCode())
         .setStatusMessage(Response.Status.NOT_MODIFIED.getReasonPhrase())
         .headers()
