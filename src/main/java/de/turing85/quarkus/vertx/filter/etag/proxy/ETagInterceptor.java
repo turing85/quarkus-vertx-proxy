@@ -43,7 +43,7 @@ class ETagInterceptor implements ProxyInterceptor {
 
   private static Future<Void> handleETag(ProxyContext context, String eTag) {
     if (extractIfNoneMatchHeader(context).contains(eTag)) {
-      setReturnAsNotChanged(context);
+      setReturnAsNotModified(context);
     }
     return context.sendResponse();
   }
@@ -65,7 +65,7 @@ class ETagInterceptor implements ProxyInterceptor {
     context.response().putHeader(HttpHeaders.ETAG, eTag);
     final Set<String> ifNoneMatch = extractIfNoneMatchHeader(context);
     if (ifNoneMatch.contains(eTag)) {
-      setReturnAsNotChanged(context);
+      setReturnAsNotModified(context);
     } else {
       context.response().setBody(Body.body(helper.file()));
     }
@@ -83,7 +83,7 @@ class ETagInterceptor implements ProxyInterceptor {
     // @formatter:on
   }
 
-  private static void setReturnAsNotChanged(ProxyContext context) {
+  private static void setReturnAsNotModified(ProxyContext context) {
     // @formatter:off
     context.response()
         .setBody(Body.body(Buffer.buffer()))
