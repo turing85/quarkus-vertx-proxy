@@ -37,7 +37,7 @@ class HashingHelper {
         .createTempFile("vertx-etag-hash-", ".tmp")
         .compose(path -> vertx
             .fileSystem()
-            .open(path, new OpenOptions().setDeleteOnClose(true))
+            .open(path, new OpenOptions())
             .map(asyncFile -> new HashingHelper(digest, vertx, path, asyncFile)));
     // @formatter:on
   }
