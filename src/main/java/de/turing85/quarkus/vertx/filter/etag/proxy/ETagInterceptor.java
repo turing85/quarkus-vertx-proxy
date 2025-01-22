@@ -9,6 +9,10 @@ import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.Response;
 import jakarta.xml.bind.DatatypeConverter;
 
+import de.turing85.quarkus.vertx.filter.etag.proxy.hashing.HashingHelper;
+import de.turing85.quarkus.vertx.filter.etag.proxy.hashing.InMemoryHashingHelper;
+import de.turing85.quarkus.vertx.filter.etag.proxy.hashing.TempFileHashingHelper;
+import io.quarkus.logging.Log;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -22,6 +26,8 @@ import static java.util.function.Predicate.not;
 
 class ETagInterceptor implements ProxyInterceptor {
   private static final Set<String> ALLOWED_METHODS = Set.of(HttpMethod.GET, HttpMethod.PUT);
+  private static final int ONE_MEGABYTE = 1024 * 1024;
+  private static final int TEN_MEGABYTES = 10 * ONE_MEGABYTE;
 
   private final Vertx vertx;
 
@@ -49,14 +55,30 @@ class ETagInterceptor implements ProxyInterceptor {
   }
 
   private Future<Void> generateAndHandleETag(ProxyContext context) {
+    long length = context.response().getBody().length();
+    if (length < 0) {
+      Log.info("Response size unknown; not generating ETag");
+      return Future.succeededFuture();
+    } else if (length > TEN_MEGABYTES) {
+      Log.infof("Response size larger than %d bytes; not generating ETag", TEN_MEGABYTES);
+      return Future.succeededFuture();
+    }
     ReadStream<Buffer> bodyStream = context.response().getBody().stream().pause();
     // @formatter:off
-    return HashingHelper.of("MD5", vertx)
-        .compose(helper -> helper
-            .process(bodyStream)
-            .compose(unused-> handleETagFromHelper(context, helper))
-            .onComplete(unused -> helper.close()));
+    return getHelper(length).compose(helper -> helper
+        .process(bodyStream)
+        .compose(unused-> handleETagFromHelper(context, helper))
+        .onComplete(unused -> helper.close()));
     // @formatter:on
+  }
+
+  private Future<? extends HashingHelper> getHelper(long length) {
+    final String algorithm = "MD5";
+    if (length < ONE_MEGABYTE) {
+      return InMemoryHashingHelper.of(algorithm);
+    } else {
+      return TempFileHashingHelper.of(algorithm, vertx);
+    }
   }
 
   private Future<Void> handleETagFromHelper(ProxyContext context, HashingHelper helper) {
@@ -67,7 +89,7 @@ class ETagInterceptor implements ProxyInterceptor {
     if (ifNoneMatch.contains(eTag)) {
       setReturnAsNotModified(context);
     } else {
-      context.response().setBody(Body.body(helper.file()));
+      context.response().setBody(helper.body());
     }
     return context.sendResponse();
   }
