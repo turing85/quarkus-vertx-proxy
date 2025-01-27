@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.filter;
+package de.turing85.quarkus.vertx.proxy;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -12,7 +12,6 @@ import jakarta.xml.bind.DatatypeConverter;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -20,17 +19,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.emptyString;
 
 @QuarkusTest
-class EndpointTest {
-  @BeforeEach
-  void setup() {
-    RestAssured.baseURI = "http://localhost:8888/hello";
-  }
+class EndpointTest extends ProxyTest {
 
   @Test
   void get() throws NoSuchAlgorithmException {
     // @formatter:off
     RestAssured
-        .when().get()
+        .when().get("/hello")
 
         .then()
             .statusCode(Response.Status.OK.getStatusCode())
@@ -51,7 +46,7 @@ class EndpointTest {
             HttpHeaders.IF_NONE_MATCH,
             String.join(",",List.of(eTagFor("otherOne"), helloETag, eTagFor("otherTwo"))))
 
-        .when().get()
+        .when().get("/hello")
 
         .then()
             .statusCode(Response.Status.NOT_MODIFIED.getStatusCode())
@@ -71,7 +66,7 @@ class EndpointTest {
             HttpHeaders.IF_NONE_MATCH,
             String.join(",",List.of(eTagFor("otherOne"), eTagFor("otherTwo"))))
 
-        .when().get()
+        .when().get("/hello")
 
         .then()
             .statusCode(Response.Status.OK.getStatusCode())
@@ -94,7 +89,7 @@ class EndpointTest {
                 String.join(",",List.of(eTagFor("otherOne"), eTag, eTagFor("otherTwo"))))
             .queryParam("eTag", eTag.replace("\"", ""))
 
-        .when().get()
+        .when().get("/hello")
 
         .then()
             .statusCode(Response.Status.NOT_MODIFIED.getStatusCode())
@@ -117,7 +112,7 @@ class EndpointTest {
                 String.join(",",List.of(eTagFor("otherOne"), eTagFor("otherTwo"))))
             .queryParam("eTag", eTag.replace("\"", ""))
 
-        .when().get()
+        .when().get("/hello")
 
         .then()
             .statusCode(Response.Status.OK.getStatusCode())

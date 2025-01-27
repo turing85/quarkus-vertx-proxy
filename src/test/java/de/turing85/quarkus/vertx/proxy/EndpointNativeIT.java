@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.filter;
+package de.turing85.quarkus.vertx.proxy;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 

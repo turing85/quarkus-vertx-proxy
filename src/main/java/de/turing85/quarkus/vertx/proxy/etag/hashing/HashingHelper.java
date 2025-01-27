@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.filter.etag.proxy.hashing;
+package de.turing85.quarkus.vertx.proxy.etag.hashing;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

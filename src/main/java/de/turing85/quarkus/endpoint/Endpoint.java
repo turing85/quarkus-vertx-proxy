@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.filter;
+package de.turing85.quarkus.endpoint;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

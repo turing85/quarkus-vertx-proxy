@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.filter.etag.proxy;
+package de.turing85.quarkus.vertx.proxy.etag;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -9,9 +9,9 @@ import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.Response;
 import jakarta.xml.bind.DatatypeConverter;
 
-import de.turing85.quarkus.vertx.filter.etag.proxy.hashing.HashingHelper;
-import de.turing85.quarkus.vertx.filter.etag.proxy.hashing.InMemoryHashingHelper;
-import de.turing85.quarkus.vertx.filter.etag.proxy.hashing.TempFileHashingHelper;
+import de.turing85.quarkus.vertx.proxy.etag.hashing.HashingHelper;
+import de.turing85.quarkus.vertx.proxy.etag.hashing.InMemoryHashingHelper;
+import de.turing85.quarkus.vertx.proxy.etag.hashing.TempFileHashingHelper;
 import io.quarkus.logging.Log;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -24,7 +24,7 @@ import io.vertx.httpproxy.ProxyInterceptor;
 
 import static java.util.function.Predicate.not;
 
-class ETagInterceptor implements ProxyInterceptor {
+public class ETagInterceptor implements ProxyInterceptor {
   private static final Set<String> ALLOWED_METHODS = Set.of(HttpMethod.GET, HttpMethod.PUT);
   private static final int ONE_MEGABYTE = 1024 * 1024;
   private static final int TEN_MEGABYTES = 10 * ONE_MEGABYTE;
