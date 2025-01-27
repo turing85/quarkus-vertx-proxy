@@ -17,14 +17,15 @@ public class TempFileHashingHelper implements HashingHelper {
   private final String path;
   private final AsyncFile file;
 
-  private TempFileHashingHelper(MessageDigest digest, Vertx vertx, String path, AsyncFile file) {
+  private TempFileHashingHelper(final MessageDigest digest, final Vertx vertx, final String path,
+      final AsyncFile file) {
     this.digest = digest;
     this.vertx = vertx;
     this.path = path;
     this.file = file;
   }
 
-  public static Future<TempFileHashingHelper> of(String algorithm, Vertx vertx) {
+  public static Future<TempFileHashingHelper> of(final String algorithm, final Vertx vertx) {
     final MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(algorithm);
@@ -53,7 +54,7 @@ public class TempFileHashingHelper implements HashingHelper {
   }
 
   @Override
-  public void handleBuffer(Buffer data, ReadStream<Buffer> bodyStream) {
+  public void handleBuffer(final Buffer data, final ReadStream<Buffer> bodyStream) {
     digest.update(data.getBytes());
     file.write(data);
     if (file.writeQueueFull()) {

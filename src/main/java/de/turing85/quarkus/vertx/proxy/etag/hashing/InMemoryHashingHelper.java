@@ -12,12 +12,12 @@ public class InMemoryHashingHelper implements HashingHelper {
   private final MessageDigest digest;
   private final Buffer buffer;
 
-  private InMemoryHashingHelper(MessageDigest digest, Buffer buffer) {
+  private InMemoryHashingHelper(final MessageDigest digest, final Buffer buffer) {
     this.digest = digest;
     this.buffer = buffer;
   }
 
-  public static Future<InMemoryHashingHelper> of(String algorithm) {
+  public static Future<InMemoryHashingHelper> of(final String algorithm) {
     final MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(algorithm);
@@ -38,7 +38,7 @@ public class InMemoryHashingHelper implements HashingHelper {
   }
 
   @Override
-  public void handleBuffer(Buffer data, ReadStream<Buffer> bodyStream) {
+  public void handleBuffer(final Buffer data, final ReadStream<Buffer> bodyStream) {
     digest.update(data.getBytes());
     buffer.appendBuffer(data);
   }

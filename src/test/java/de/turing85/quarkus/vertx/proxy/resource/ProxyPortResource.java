@@ -9,8 +9,10 @@ import de.turing85.quarkus.vertx.proxy.config.ProxyConfig;
 import io.quarkus.logging.Log;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jspecify.annotations.Nullable;
 
 public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
+  @Nullable
   private static Integer actualPort;
 
   @Override
@@ -19,13 +21,13 @@ public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
         .getOptionalValue("quarkus.vertx-proxy.http.test-port", Integer.class)
         .orElse(ProxyConfig.DEFAULT_PORT);
     actualPort = getActualPort(configuredTestPort);
-    String actualPortAsString = Integer.toString(actualPort);
+    final String actualPortAsString = Integer.toString(actualPort);
     return Map.of("quarkus.vertx-proxy.http.port", actualPortAsString,
         "quarkus.test.container.additional-exposed-ports.%d".formatted(actualPort),
         actualPortAsString);
   }
 
-  private static int getActualPort(int configuredTestPort) {
+  private static int getActualPort(final int configuredTestPort) {
     if (configuredTestPort < 0) {
       return findFreePort();
     } else {
@@ -56,11 +58,14 @@ public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
     actualPort = null;
   }
 
-  public static String proxyUrl() {
+  @Override
+  public void inject(final TestInjector testInjector) {
     // @formatter:off
-    return Optional.ofNullable(actualPort)
-        .map("http://localhost:%d"::formatted)
-        .orElseThrow(() -> new IllegalStateException("Proxy has not yet been initialized"));
+    testInjector.injectIntoFields(
+        Optional.ofNullable(actualPort)
+            .map("http://localhost:%d"::formatted)
+            .orElseThrow(() -> new IllegalStateException("Proxy has not yet been initialized")),
+        new TestInjector.AnnotatedAndMatchesType(InjectProxyUrl.class, String.class));
     // @formatter:on
   }
 }

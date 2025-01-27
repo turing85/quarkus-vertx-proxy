@@ -21,18 +21,18 @@ public class Proxy {
   private final LaunchMode launchMode;
 
   @Inject
-  public Proxy(@SuppressWarnings("CdiInjectionPointsInspection") Vertx vertx,
-      ProxyConfig proxyConfig, LaunchMode launchMode) {
+  public Proxy(@SuppressWarnings("CdiInjectionPointsInspection") final Vertx vertx,
+      final ProxyConfig proxyConfig, final LaunchMode launchMode) {
     this.vertx = vertx;
     this.proxyHttpPort = proxyConfig.httpPort();
     this.launchMode = launchMode;
   }
 
-  void observe(@ObservesAsync HttpServerStart ignored) {
-    HttpClient proxyClient = vertx.createHttpClient();
-    HttpProxy proxy = HttpProxy.reverseProxy(proxyClient);
-    String portPropertyName = launchMode == LaunchMode.TEST ? "test-port" : "port";
-    int httpPort = ConfigProvider.getConfig()
+  void observe(@ObservesAsync final HttpServerStart ignored) {
+    final HttpClient proxyClient = vertx.createHttpClient();
+    final HttpProxy proxy = HttpProxy.reverseProxy(proxyClient);
+    final String portPropertyName = launchMode == LaunchMode.TEST ? "test-port" : "port";
+    final int httpPort = ConfigProvider.getConfig()
         .getValue("quarkus.http.%s".formatted(portPropertyName), Integer.class);
     proxy.origin(httpPort, "localhost");
     proxy.addInterceptor(new ETagInterceptor(vertx));

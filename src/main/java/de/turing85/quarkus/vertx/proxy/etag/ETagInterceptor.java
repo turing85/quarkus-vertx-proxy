@@ -1,6 +1,7 @@
 package de.turing85.quarkus.vertx.proxy.etag;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,12 +32,12 @@ public class ETagInterceptor implements ProxyInterceptor {
 
   private final Vertx vertx;
 
-  public ETagInterceptor(Vertx vertx) {
+  public ETagInterceptor(final Vertx vertx) {
     this.vertx = vertx;
   }
 
   @Override
-  public Future<Void> handleProxyResponse(ProxyContext context) {
+  public Future<Void> handleProxyResponse(final ProxyContext context) {
     if (!ALLOWED_METHODS.contains(context.request().getMethod().name())) {
       return context.sendResponse();
     }
@@ -47,15 +48,15 @@ public class ETagInterceptor implements ProxyInterceptor {
     // @formatter:on
   }
 
-  private static Future<Void> handleETag(ProxyContext context, String eTag) {
+  private static Future<Void> handleETag(final ProxyContext context, final String eTag) {
     if (extractIfNoneMatchHeader(context).contains(eTag)) {
       setReturnAsNotModified(context);
     }
     return context.sendResponse();
   }
 
-  private Future<Void> generateAndHandleETag(ProxyContext context) {
-    long length = context.response().getBody().length();
+  private Future<Void> generateAndHandleETag(final ProxyContext context) {
+    final long length = context.response().getBody().length();
     if (length < 0) {
       Log.info("Response size unknown; not generating ETag");
       return Future.succeededFuture();
@@ -63,7 +64,7 @@ public class ETagInterceptor implements ProxyInterceptor {
       Log.infof("Response size larger than %d bytes; not generating ETag", TEN_MEGABYTES);
       return Future.succeededFuture();
     }
-    ReadStream<Buffer> bodyStream = context.response().getBody().stream().pause();
+    final ReadStream<Buffer> bodyStream = context.response().getBody().stream().pause();
     // @formatter:off
     return getHelper(length).compose(helper -> helper
         .process(bodyStream)
@@ -72,7 +73,7 @@ public class ETagInterceptor implements ProxyInterceptor {
     // @formatter:on
   }
 
-  private Future<? extends HashingHelper> getHelper(long length) {
+  private Future<? extends HashingHelper> getHelper(final long length) {
     final String algorithm = "MD5";
     if (length < ONE_MEGABYTE) {
       return InMemoryHashingHelper.of(algorithm);
@@ -81,9 +82,10 @@ public class ETagInterceptor implements ProxyInterceptor {
     }
   }
 
-  private Future<Void> handleETagFromHelper(ProxyContext context, HashingHelper helper) {
-    final String eTag =
-        "\"%s\"".formatted(DatatypeConverter.printHexBinary(helper.digest()).toLowerCase());
+  private Future<Void> handleETagFromHelper(final ProxyContext context,
+      final HashingHelper helper) {
+    final String eTag = "\"%s\""
+        .formatted(DatatypeConverter.printHexBinary(helper.digest()).toLowerCase(Locale.ROOT));
     context.response().putHeader(HttpHeaders.ETAG, eTag);
     final Set<String> ifNoneMatch = extractIfNoneMatchHeader(context);
     if (ifNoneMatch.contains(eTag)) {
@@ -94,7 +96,7 @@ public class ETagInterceptor implements ProxyInterceptor {
     return context.sendResponse();
   }
 
-  private static Set<String> extractIfNoneMatchHeader(ProxyContext context) {
+  private static Set<String> extractIfNoneMatchHeader(final ProxyContext context) {
     // @formatter:off
     return Arrays.stream(
             Optional.ofNullable(context.request().headers().get(HttpHeaders.IF_NONE_MATCH))
@@ -105,7 +107,7 @@ public class ETagInterceptor implements ProxyInterceptor {
     // @formatter:on
   }
 
-  private static void setReturnAsNotModified(ProxyContext context) {
+  private static void setReturnAsNotModified(final ProxyContext context) {
     // @formatter:off
     context.response()
         .setBody(Body.body(Buffer.buffer()))

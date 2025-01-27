@@ -13,7 +13,7 @@ public interface HashingHelper {
 
   void handleBuffer(Buffer data, ReadStream<Buffer> bodyStream);
 
-  default Future<Void> process(ReadStream<Buffer> bodyStream) {
+  default Future<Void> process(final ReadStream<Buffer> bodyStream) {
     final Promise<Void> promise = Promise.promise();
     // @formatter:off
     bodyStream

@@ -4,15 +4,18 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.xml.bind.DatatypeConverter;
 
+import de.turing85.quarkus.resource.HelloResource;
 import de.turing85.quarkus.vertx.proxy.resource.ProxyTest;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -20,13 +23,17 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.emptyString;
 
 @QuarkusTest
-class EndpointTest extends ProxyTest {
+class HelloResourceTest extends ProxyTest {
+  @BeforeEach
+  void setup() {
+    RestAssured.baseURI = "%s/%s".formatted(RestAssured.baseURI, HelloResource.PATH);
+  }
 
   @Test
   void get() throws NoSuchAlgorithmException {
     // @formatter:off
     RestAssured
-        .when().get("/hello")
+        .when().get()
 
         .then()
             .statusCode(Response.Status.OK.getStatusCode())
@@ -47,7 +54,7 @@ class EndpointTest extends ProxyTest {
             HttpHeaders.IF_NONE_MATCH,
             String.join(",",List.of(eTagFor("otherOne"), helloETag, eTagFor("otherTwo"))))
 
-        .when().get("/hello")
+        .when().get()
 
         .then()
             .statusCode(Response.Status.NOT_MODIFIED.getStatusCode())
@@ -67,7 +74,7 @@ class EndpointTest extends ProxyTest {
             HttpHeaders.IF_NONE_MATCH,
             String.join(",",List.of(eTagFor("otherOne"), eTagFor("otherTwo"))))
 
-        .when().get("/hello")
+        .when().get()
 
         .then()
             .statusCode(Response.Status.OK.getStatusCode())
@@ -82,7 +89,7 @@ class EndpointTest extends ProxyTest {
   @Test
   void getWithMatchingETagFromBackend() throws NoSuchAlgorithmException {
     // @formatter:off
-    String eTag = "\"hello\"";
+    final String eTag = "\"hello\"";
     RestAssured
         .given()
             .header(
@@ -90,7 +97,7 @@ class EndpointTest extends ProxyTest {
                 String.join(",",List.of(eTagFor("otherOne"), eTag, eTagFor("otherTwo"))))
             .queryParam("eTag", eTag.replace("\"", ""))
 
-        .when().get("/hello")
+        .when().get()
 
         .then()
             .statusCode(Response.Status.NOT_MODIFIED.getStatusCode())
@@ -105,7 +112,7 @@ class EndpointTest extends ProxyTest {
   @Test
   void getWithMismatchingETagFromBackend() throws NoSuchAlgorithmException {
     // @formatter:off
-    String eTag = "\"hello\"";
+    final String eTag = "\"hello\"";
     RestAssured
         .given()
             .header(
@@ -113,7 +120,7 @@ class EndpointTest extends ProxyTest {
                 String.join(",",List.of(eTagFor("otherOne"), eTagFor("otherTwo"))))
             .queryParam("eTag", eTag.replace("\"", ""))
 
-        .when().get("/hello")
+        .when().get()
 
         .then()
             .statusCode(Response.Status.OK.getStatusCode())
@@ -125,11 +132,10 @@ class EndpointTest extends ProxyTest {
     // @formatter:on
   }
 
-  private static String eTagFor(String value) throws NoSuchAlgorithmException {
+  private static String eTagFor(final String value) throws NoSuchAlgorithmException {
     return "\"%s\"".formatted(DatatypeConverter
         .printHexBinary(
             MessageDigest.getInstance("MD5").digest(value.getBytes(StandardCharsets.UTF_8)))
-        .toLowerCase());
+        .toLowerCase(Locale.ROOT));
   }
-
 }
