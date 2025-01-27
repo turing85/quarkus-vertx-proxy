@@ -1,6 +1,5 @@
-package de.turing85.quarkus.vertx.proxy;
+package de.turing85.quarkus.vertx.proxy.resource;
 
-import de.turing85.quarkus.vertx.proxy.resource.ProxyPortResource;
 import io.quarkus.test.common.WithTestResource;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;

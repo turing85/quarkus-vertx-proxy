@@ -18,15 +18,19 @@ public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
     final int configuredTestPort = ConfigProvider.getConfig()
         .getOptionalValue("quarkus.vertx-proxy.http.test-port", Integer.class)
         .orElse(ProxyConfig.DEFAULT_PORT);
-    if (configuredTestPort < 0) {
-      actualPort = findFreePort();
-    } else {
-      actualPort = configuredTestPort;
-    }
+    actualPort = getActualPort(configuredTestPort);
     String actualPortAsString = Integer.toString(actualPort);
     return Map.of("quarkus.vertx-proxy.http.port", actualPortAsString,
         "quarkus.test.container.additional-exposed-ports.%d".formatted(actualPort),
         actualPortAsString);
+  }
+
+  private static int getActualPort(int configuredTestPort) {
+    if (configuredTestPort < 0) {
+      return findFreePort();
+    } else {
+      return configuredTestPort;
+    }
   }
 
   private static int findFreePort() {
