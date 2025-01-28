@@ -16,5 +16,6 @@ public interface ProxyConfig {
 
   @WithName("http.test-port")
   @WithDefault("" + DEFAULT_TEST_PORT)
+  @SuppressWarnings("unused")
   int httpTestPort();
 }

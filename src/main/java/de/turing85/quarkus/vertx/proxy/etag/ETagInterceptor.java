@@ -13,7 +13,6 @@ import jakarta.xml.bind.DatatypeConverter;
 import de.turing85.quarkus.vertx.proxy.etag.hashing.HashingHelper;
 import de.turing85.quarkus.vertx.proxy.etag.hashing.InMemoryHashingHelper;
 import de.turing85.quarkus.vertx.proxy.etag.hashing.TempFileHashingHelper;
-import io.quarkus.logging.Log;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -27,8 +26,7 @@ import static java.util.function.Predicate.not;
 
 public class ETagInterceptor implements ProxyInterceptor {
   private static final Set<String> ALLOWED_METHODS = Set.of(HttpMethod.GET, HttpMethod.PUT);
-  private static final int ONE_MEGABYTE = 1024 * 1024;
-  private static final int TEN_MEGABYTES = 10 * ONE_MEGABYTE;
+  private static final int ONE_KILOBYTE = 1024;
 
   private final Vertx vertx;
 
@@ -57,13 +55,6 @@ public class ETagInterceptor implements ProxyInterceptor {
 
   private Future<Void> generateAndHandleETag(final ProxyContext context) {
     final long length = context.response().getBody().length();
-    if (length < 0) {
-      Log.info("Response size unknown; not generating ETag");
-      return Future.succeededFuture();
-    } else if (length > TEN_MEGABYTES) {
-      Log.infof("Response size larger than %d bytes; not generating ETag", TEN_MEGABYTES);
-      return Future.succeededFuture();
-    }
     final ReadStream<Buffer> bodyStream = context.response().getBody().stream().pause();
     // @formatter:off
     return getHelper(length).compose(helper -> helper
@@ -75,7 +66,7 @@ public class ETagInterceptor implements ProxyInterceptor {
 
   private Future<? extends HashingHelper> getHelper(final long length) {
     final String algorithm = "MD5";
-    if (length < ONE_MEGABYTE) {
+    if (length < ONE_KILOBYTE) {
       return InMemoryHashingHelper.of(algorithm);
     } else {
       return TempFileHashingHelper.of(algorithm, vertx);

@@ -3,10 +3,8 @@ package de.turing85.quarkus.vertx.proxy.resource;
 import java.net.ServerSocket;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import de.turing85.quarkus.vertx.proxy.config.ProxyConfig;
-import io.quarkus.logging.Log;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jspecify.annotations.Nullable;
@@ -29,27 +27,17 @@ public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
 
   private static int getActualPort(final int configuredTestPort) {
     if (configuredTestPort < 0) {
-      return findFreePort();
+      return getRandomPort();
     } else {
       return configuredTestPort;
     }
   }
 
-  private static int findFreePort() {
-    int tries = 0;
-    final Random random = new Random();
-    while (true) {
-      if (tries > 1_000) {
-        Log.error("Cannot find a free port");
-        throw new RuntimeException("Cannot find a free port");
-      }
-      int candidate = random.nextInt(1000, 65_536);
-      try {
-        new ServerSocket(candidate).close();
-        return candidate;
-      } catch (Exception e) {
-        ++tries;
-      }
+  private static int getRandomPort() {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      return socket.getLocalPort();
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot find a free port");
     }
   }
 

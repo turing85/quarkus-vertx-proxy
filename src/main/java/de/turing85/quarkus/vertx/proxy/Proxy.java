@@ -8,6 +8,7 @@ import de.turing85.quarkus.vertx.proxy.config.ProxyConfig;
 import de.turing85.quarkus.vertx.proxy.etag.ETagInterceptor;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.LaunchMode;
+import io.quarkus.runtime.Quarkus;
 import io.quarkus.vertx.http.HttpServerStart;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -36,9 +37,15 @@ public class Proxy {
         .getValue("quarkus.http.%s".formatted(portPropertyName), Integer.class);
     proxy.origin(httpPort, "localhost");
     proxy.addInterceptor(new ETagInterceptor(vertx));
-
-    vertx.createHttpServer().requestHandler(proxy).listen(proxyHttpPort);
-    Log.infof("vert.x proxy started on  http://localhost:%d, forwarding to http://localhost:%d",
-        proxyHttpPort, httpPort);
+    // @formatter:off
+    vertx.createHttpServer().requestHandler(proxy).listen(proxyHttpPort)
+        .onSuccess(unused -> Log.infof(
+            "vert.x proxy started on  http://localhost:%d, forwarding to http://localhost:%d",
+            proxyHttpPort, httpPort))
+        .onFailure(cause -> {
+          Log.errorf("Failed to start proxy.", cause);
+          Quarkus.asyncExit(1);
+        });
+    // @formatter:on
   }
 }
