@@ -1,35 +1,22 @@
 package de.turing85.quarkus.vertx.proxy;
 
-import jakarta.enterprise.event.ObservesAsync;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
-import de.turing85.quarkus.vertx.proxy.config.ProxyConfig;
 import de.turing85.quarkus.vertx.proxy.etag.ETagInterceptor;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.LaunchMode;
 import io.quarkus.runtime.Quarkus;
-import io.quarkus.vertx.http.HttpServerStart;
-import io.vertx.core.Vertx;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpClient;
 import io.vertx.httpproxy.HttpProxy;
+import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-@Singleton
-public class Proxy {
-  private final Vertx vertx;
+@RequiredArgsConstructor
+public class ProxyVerticle extends AbstractVerticle {
   private final int proxyHttpPort;
   private final LaunchMode launchMode;
 
-  @Inject
-  public Proxy(@SuppressWarnings("CdiInjectionPointsInspection") final Vertx vertx,
-      final ProxyConfig proxyConfig, final LaunchMode launchMode) {
-    this.vertx = vertx;
-    this.proxyHttpPort = proxyConfig.httpPort();
-    this.launchMode = launchMode;
-  }
-
-  void observe(@ObservesAsync final HttpServerStart ignored) {
+  @Override
+  public void start() {
     final HttpClient proxyClient = vertx.createHttpClient();
     final HttpProxy proxy = HttpProxy.reverseProxy(proxyClient);
     final String portPropertyName = launchMode == LaunchMode.TEST ? "test-port" : "port";
