@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.proxy.etag.hashing;
+package de.turing85.quarkus.vertx.proxy.impl.etag.hashing;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

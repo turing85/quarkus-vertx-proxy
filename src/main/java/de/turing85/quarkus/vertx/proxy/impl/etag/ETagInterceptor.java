@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.proxy.etag;
+package de.turing85.quarkus.vertx.proxy.impl.etag;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -10,9 +10,9 @@ import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.Response;
 import jakarta.xml.bind.DatatypeConverter;
 
-import de.turing85.quarkus.vertx.proxy.etag.hashing.HashingHelper;
-import de.turing85.quarkus.vertx.proxy.etag.hashing.InMemoryHashingHelper;
-import de.turing85.quarkus.vertx.proxy.etag.hashing.TempFileHashingHelper;
+import de.turing85.quarkus.vertx.proxy.impl.etag.hashing.HashingHelper;
+import de.turing85.quarkus.vertx.proxy.impl.etag.hashing.InMemoryHashingHelper;
+import de.turing85.quarkus.vertx.proxy.impl.etag.hashing.TempFileHashingHelper;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -21,24 +21,20 @@ import io.vertx.core.streams.ReadStream;
 import io.vertx.httpproxy.Body;
 import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 import static java.util.function.Predicate.not;
 
-public class ETagInterceptor implements ProxyInterceptor {
-  private static final Set<String> ALLOWED_METHODS = Set.of(HttpMethod.GET, HttpMethod.PUT);
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+class ETagInterceptor implements ProxyInterceptor {
+  private static final Set<String> CAN_RETURN_NOT_MODIFIED = Set.of(HttpMethod.GET, HttpMethod.PUT);
   private static final int ONE_KILOBYTE = 1024;
 
   private final Vertx vertx;
 
-  public ETagInterceptor(final Vertx vertx) {
-    this.vertx = vertx;
-  }
-
   @Override
   public Future<Void> handleProxyResponse(final ProxyContext context) {
-    if (!ALLOWED_METHODS.contains(context.request().getMethod().name())) {
-      return context.sendResponse();
-    }
     // @formatter:off
     return Optional.ofNullable(context.response().etag())
         .map(eTag -> handleETag(context, eTag))
@@ -47,7 +43,7 @@ public class ETagInterceptor implements ProxyInterceptor {
   }
 
   private static Future<Void> handleETag(final ProxyContext context, final String eTag) {
-    if (extractIfNoneMatchHeader(context).contains(eTag)) {
+    if (shouldReturnNotModified(context, eTag)) {
       setReturnAsNotModified(context);
     }
     return context.sendResponse();
@@ -78,8 +74,7 @@ public class ETagInterceptor implements ProxyInterceptor {
     final String eTag = "\"%s\""
         .formatted(DatatypeConverter.printHexBinary(helper.digest()).toLowerCase(Locale.ROOT));
     context.response().putHeader(HttpHeaders.ETAG, eTag);
-    final Set<String> ifNoneMatch = extractIfNoneMatchHeader(context);
-    if (ifNoneMatch.contains(eTag)) {
+    if (shouldReturnNotModified(context, eTag)) {
       setReturnAsNotModified(context);
     } else {
       context.response().setBody(helper.body());
@@ -87,11 +82,16 @@ public class ETagInterceptor implements ProxyInterceptor {
     return context.sendResponse();
   }
 
+  private static boolean shouldReturnNotModified(final ProxyContext context, final String eTag) {
+    return CAN_RETURN_NOT_MODIFIED.contains(context.request().getMethod().name())
+        && extractIfNoneMatchHeader(context).contains(eTag);
+  }
+
   private static Set<String> extractIfNoneMatchHeader(final ProxyContext context) {
     // @formatter:off
-    return Arrays.stream(
-            Optional.ofNullable(context.request().headers().get(HttpHeaders.IF_NONE_MATCH))
-                .orElse("").split(","))
+    return Arrays
+        .stream(Optional.ofNullable(context.request().headers().get(HttpHeaders.IF_NONE_MATCH))
+            .orElse("").split(","))
         .map(String::trim)
         .filter(not(String::isBlank))
         .collect(Collectors.toSet());

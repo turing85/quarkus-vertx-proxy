@@ -1,6 +1,7 @@
 package de.turing85.quarkus.vertx.proxy.resource;
 
 import java.net.ServerSocket;
+import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
   public Map<String, String> start() {
     final int configuredTestPort = ConfigProvider.getConfig()
         .getOptionalValue("quarkus.vertx-proxy.http.test-port", Integer.class)
-        .orElse(ProxyConfig.DEFAULT_PORT);
+        .orElse(ProxyConfig.DEFAULT_TEST_PORT);
     actualPort = getActualPort(configuredTestPort);
     final String actualPortAsString = Integer.toString(actualPort);
     return Map.of("quarkus.vertx-proxy.http.port", actualPortAsString,
@@ -51,9 +52,9 @@ public class ProxyPortResource implements QuarkusTestResourceLifecycleManager {
     // @formatter:off
     testInjector.injectIntoFields(
         Optional.ofNullable(actualPort)
-            .map("http://localhost:%d"::formatted)
+            .map(port -> URI.create("http://localhost:%d".formatted(port)))
             .orElseThrow(() -> new IllegalStateException("Proxy has not yet been initialized")),
-        new TestInjector.AnnotatedAndMatchesType(InjectProxyUrl.class, String.class));
+        new TestInjector.AnnotatedAndMatchesType(InjectProxy.class, URI.class));
     // @formatter:on
   }
 }

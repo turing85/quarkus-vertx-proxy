@@ -1,26 +1,27 @@
 package de.turing85.quarkus.vertx.proxy;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Locale;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.xml.bind.DatatypeConverter;
 
 import de.turing85.quarkus.resource.HelloResource;
+import de.turing85.quarkus.vertx.proxy.impl.forwarded.xff.XFFInterceptor;
+import de.turing85.quarkus.vertx.proxy.impl.forwarded.xfh.XFHInterceptor;
+import de.turing85.quarkus.vertx.proxy.impl.forwarded.xfp.XFPInterceptor;
 import de.turing85.quarkus.vertx.proxy.resource.ProxyTest;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 @QuarkusTest
 class HelloResourceTest extends ProxyTest {
@@ -30,8 +31,10 @@ class HelloResourceTest extends ProxyTest {
   }
 
   @Test
-  void get() throws NoSuchAlgorithmException {
+  void get() {
     // @formatter:off
+    final String helloETag = postEntityAndGetETag();
+
     RestAssured
         .when().get()
 
@@ -40,19 +43,22 @@ class HelloResourceTest extends ProxyTest {
             .contentType(MediaType.TEXT_PLAIN)
             .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
             .header(HttpHeaders.CONTENT_LENGTH, "5")
-            .header(HttpHeaders.ETAG, eTagFor("Hello"))
-            .body(is("Hello"));
+            .header(HttpHeaders.ETAG, helloETag)
+            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
+            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
+            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
+            .body(is("hello"));
     // @formatter:on
   }
 
   @Test
-  void getWithMatchingETag() throws NoSuchAlgorithmException {
-    final String helloETag = eTagFor("Hello");
+  void getWithMatchingETag() {
     // @formatter:off
+    final String helloETag = postEntityAndGetETag();
     RestAssured
         .given().header(
             HttpHeaders.IF_NONE_MATCH,
-            String.join(",",List.of(eTagFor("otherOne"), helloETag, eTagFor("otherTwo"))))
+            String.join(",",List.of("\"otherOne\"", helloETag, "\"otherTwo\"")))
 
         .when().get()
 
@@ -62,17 +68,21 @@ class HelloResourceTest extends ProxyTest {
             .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
             .header(HttpHeaders.CONTENT_LENGTH, "0")
             .header(HttpHeaders.ETAG, helloETag)
+            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
+            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
+            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
             .body(is(emptyString()));
     // @formatter:on
   }
 
   @Test
-  void getWithMismatchingETag() throws NoSuchAlgorithmException {
+  void getWithMismatchingETag() {
     // @formatter:off
+    final String helloETag = postEntityAndGetETag();
     RestAssured
         .given().header(
             HttpHeaders.IF_NONE_MATCH,
-            String.join(",",List.of(eTagFor("otherOne"), eTagFor("otherTwo"))))
+            String.join(",",List.of("\"otherOne\"", "\"otherTwo\"")))
 
         .when().get()
 
@@ -81,20 +91,23 @@ class HelloResourceTest extends ProxyTest {
             .contentType(MediaType.TEXT_PLAIN)
             .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
             .header(HttpHeaders.CONTENT_LENGTH, "5")
-            .header(HttpHeaders.ETAG, eTagFor("Hello"))
-            .body(is("Hello"));
+            .header(HttpHeaders.ETAG, helloETag)
+            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
+            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
+            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
+            .body(is("hello"));
     // @formatter:on
   }
 
   @Test
-  void getWithMatchingETagFromBackend() throws NoSuchAlgorithmException {
+  void getWithMatchingETagFromBackend() {
     // @formatter:off
     final String eTag = "\"hello\"";
     RestAssured
         .given()
             .header(
                 HttpHeaders.IF_NONE_MATCH,
-                String.join(",",List.of(eTagFor("otherOne"), eTag, eTagFor("otherTwo"))))
+                String.join(",",List.of("\"otherOne\"", eTag, "\"otherTwo\"")))
             .queryParam("eTag", eTag.replace("\"", ""))
 
         .when().get()
@@ -105,19 +118,22 @@ class HelloResourceTest extends ProxyTest {
             .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
             .header(HttpHeaders.CONTENT_LENGTH, "0")
             .header(HttpHeaders.ETAG, eTag)
+            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
+            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
+            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
             .body(is(emptyString()));
     // @formatter:on
   }
 
   @Test
-  void getWithMismatchingETagFromBackend() throws NoSuchAlgorithmException {
+  void getWithMismatchingETagFromBackend() {
     // @formatter:off
     final String eTag = "\"hello\"";
     RestAssured
         .given()
             .header(
                 HttpHeaders.IF_NONE_MATCH,
-                String.join(",",List.of(eTagFor("otherOne"), eTagFor("otherTwo"))))
+                String.join(",",List.of("\"otherOne\"", "\"otherTwo\"")))
             .queryParam("eTag", eTag.replace("\"", ""))
 
         .when().get()
@@ -128,14 +144,30 @@ class HelloResourceTest extends ProxyTest {
             .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
             .header(HttpHeaders.CONTENT_LENGTH, "5")
             .header(HttpHeaders.ETAG, eTag)
-            .body(is("Hello"));
+            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
+            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
+            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
+            .body(is("hello"));
     // @formatter:on
   }
 
-  private static String eTagFor(final String value) throws NoSuchAlgorithmException {
-    return "\"%s\"".formatted(DatatypeConverter
-        .printHexBinary(
-            MessageDigest.getInstance("MD5").digest(value.getBytes(StandardCharsets.UTF_8)))
-        .toLowerCase(Locale.ROOT));
+  private String postEntityAndGetETag() {
+    // @formatter:off
+    return RestAssured
+        .when().post()
+        .then()
+            .statusCode(Response.Status.CREATED.getStatusCode())
+            .contentType(MediaType.TEXT_PLAIN)
+            .header(HttpHeaders.LOCATION, getProxyUri(HelloResource.PATH).toString())
+            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
+            .header(HttpHeaders.CONTENT_LENGTH, "5")
+            .header(HttpHeaders.ETAG, is(notNullValue()))
+            .header(HttpHeaders.ETAG, is(not(emptyString())))
+            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
+            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
+            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
+            .body(is("hello"))
+            .extract().header(HttpHeaders.ETAG);
+    // @formatter:on
   }
 }
