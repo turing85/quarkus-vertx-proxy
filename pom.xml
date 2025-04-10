@@ -29,7 +29,7 @@
         <!-- Quarkus versions -->
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.21.0</quarkus.platform.version>
+        <quarkus.platform.version>3.21.2</quarkus.platform.version>
 
         <!-- Project setup -->
         <attach-elf.skip>true</attach-elf.skip>
