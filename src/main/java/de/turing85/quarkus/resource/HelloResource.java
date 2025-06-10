@@ -26,11 +26,10 @@ public class HelloResource {
 
   @GET
   public Uni<Response> get(@QueryParam("eTag") @Nullable final String eTag) {
-    final Response.ResponseBuilder response = Response.ok("Hello").entity(PATH);
+    final Response.ResponseBuilder response = Response.ok(PATH);
     if (eTag != null && !eTag.isEmpty()) {
       response.tag(new EntityTag(eTag));
     }
     return Uni.createFrom().item(response.build());
   }
-
 }
