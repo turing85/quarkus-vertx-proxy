@@ -16,8 +16,8 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -32,29 +32,28 @@ class HelloResourceTest extends ProxyTest {
 
   @Test
   void get() {
-    // @formatter:off
     final String helloETag = postEntityAndGetETag();
-
+    // @formatter:off
     RestAssured
         .when().get()
 
-        .then()
+        .then().assertThat()
             .statusCode(Response.Status.OK.getStatusCode())
-            .contentType(MediaType.TEXT_PLAIN)
-            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
-            .header(HttpHeaders.CONTENT_LENGTH, "5")
-            .header(HttpHeaders.ETAG, helloETag)
-            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
-            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
-            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
-            .body(is("hello"));
+            .and().contentType(MediaType.TEXT_PLAIN)
+            .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
+            .and().header(HttpHeaders.CONTENT_LENGTH, "5")
+            .and().header(HttpHeaders.ETAG, helloETag)
+            .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().body(is("hello"));
     // @formatter:on
   }
 
   @Test
   void getWithMatchingETag() {
-    // @formatter:off
     final String helloETag = postEntityAndGetETag();
+    // @formatter:off
     RestAssured
         .given().header(
             HttpHeaders.IF_NONE_MATCH,
@@ -62,23 +61,23 @@ class HelloResourceTest extends ProxyTest {
 
         .when().get()
 
-        .then()
+        .then().assertThat()
             .statusCode(Response.Status.NOT_MODIFIED.getStatusCode())
-            .contentType(is(emptyString()))
-            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
-            .header(HttpHeaders.CONTENT_LENGTH, "0")
-            .header(HttpHeaders.ETAG, helloETag)
-            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
-            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
-            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
-            .body(is(emptyString()));
+            .and().contentType(emptyString())
+            .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
+            .and().header(HttpHeaders.CONTENT_LENGTH, "0")
+            .and().header(HttpHeaders.ETAG, helloETag)
+            .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().body(is(emptyString()));
     // @formatter:on
   }
 
   @Test
   void getWithMismatchingETag() {
-    // @formatter:off
     final String helloETag = postEntityAndGetETag();
+    // @formatter:off
     RestAssured
         .given().header(
             HttpHeaders.IF_NONE_MATCH,
@@ -86,23 +85,23 @@ class HelloResourceTest extends ProxyTest {
 
         .when().get()
 
-        .then()
+        .then().assertThat()
             .statusCode(Response.Status.OK.getStatusCode())
-            .contentType(MediaType.TEXT_PLAIN)
-            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
-            .header(HttpHeaders.CONTENT_LENGTH, "5")
-            .header(HttpHeaders.ETAG, helloETag)
-            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
-            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
-            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
-            .body(is("hello"));
+            .and().contentType(MediaType.TEXT_PLAIN)
+            .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
+            .and().header(HttpHeaders.CONTENT_LENGTH, "5")
+            .and().header(HttpHeaders.ETAG, helloETag)
+            .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().body(is("hello"));
     // @formatter:on
   }
 
   @Test
   void getWithMatchingETagFromBackend() {
-    // @formatter:off
     final String eTag = "\"hello\"";
+    // @formatter:off
     RestAssured
         .given()
             .header(
@@ -112,23 +111,23 @@ class HelloResourceTest extends ProxyTest {
 
         .when().get()
 
-        .then()
+        .then().assertThat()
             .statusCode(Response.Status.NOT_MODIFIED.getStatusCode())
-            .contentType(is(emptyString()))
-            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
-            .header(HttpHeaders.CONTENT_LENGTH, "0")
-            .header(HttpHeaders.ETAG, eTag)
-            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
-            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
-            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
-            .body(is(emptyString()));
+            .and().contentType(emptyString())
+            .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
+            .and().header(HttpHeaders.CONTENT_LENGTH, "0")
+            .and().header(HttpHeaders.ETAG, eTag)
+            .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().body(is(emptyString()));
     // @formatter:on
   }
 
   @Test
   void getWithMismatchingETagFromBackend() {
-    // @formatter:off
     final String eTag = "\"hello\"";
+    // @formatter:off
     RestAssured
         .given()
             .header(
@@ -138,16 +137,16 @@ class HelloResourceTest extends ProxyTest {
 
         .when().get()
 
-        .then()
+        .then().assertThat()
             .statusCode(Response.Status.OK.getStatusCode())
-            .contentType(MediaType.TEXT_PLAIN)
-            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
-            .header(HttpHeaders.CONTENT_LENGTH, "5")
-            .header(HttpHeaders.ETAG, eTag)
-            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
-            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
-            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
-            .body(is("hello"));
+            .and().contentType(MediaType.TEXT_PLAIN)
+            .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
+            .and().header(HttpHeaders.CONTENT_LENGTH, "5")
+            .and().header(HttpHeaders.ETAG, eTag)
+            .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().body(is("hello"));
     // @formatter:on
   }
 
@@ -156,17 +155,18 @@ class HelloResourceTest extends ProxyTest {
     return RestAssured
         .when().post()
         .then()
-            .statusCode(Response.Status.CREATED.getStatusCode())
-            .contentType(MediaType.TEXT_PLAIN)
-            .header(HttpHeaders.LOCATION, getProxyUri(HelloResource.PATH).toString())
-            .header(HttpHeaders.CONTENT_ENCODING, is(nullValue()))
-            .header(HttpHeaders.CONTENT_LENGTH, "5")
-            .header(HttpHeaders.ETAG, is(notNullValue()))
-            .header(HttpHeaders.ETAG, is(not(emptyString())))
-            .header(XFPInterceptor.HEADER_XFP, is(getProxyUri().getScheme()))
-            .header(XFHInterceptor.HEADER_XFH, is(getProxyUri().getAuthority()))
-            .header(XFFInterceptor.HEADER_XFF, containsString(", "))
-            .body(is("hello"))
+            .assertThat()
+                .statusCode(Response.Status.CREATED.getStatusCode())
+                .and().contentType(MediaType.TEXT_PLAIN)
+                .and().header(HttpHeaders.LOCATION, getProxyUri(HelloResource.PATH).toString())
+                .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
+                .and().header(HttpHeaders.CONTENT_LENGTH, "5")
+                .and().header(HttpHeaders.ETAG, notNullValue())
+                .and().header(HttpHeaders.ETAG, not(emptyString()))
+                .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
+                .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+                .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+                .and().body(is("hello"))
             .extract().header(HttpHeaders.ETAG);
     // @formatter:on
   }
