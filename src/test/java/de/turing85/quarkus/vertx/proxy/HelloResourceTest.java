@@ -154,6 +154,7 @@ class HelloResourceTest extends ProxyTest {
     // @formatter:off
     return RestAssured
         .when().post()
+
         .then()
             .assertThat()
                 .statusCode(Response.Status.CREATED.getStatusCode())

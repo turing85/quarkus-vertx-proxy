@@ -1,6 +1,6 @@
 ARG DISTROLESS_IMAGE="quay.io/quarkus/quarkus-distroless-image:2.0-2024-12-29@sha256:5cead26d2ffeed26ee830bdcd829e8e9a56f03879bae35031e4e8fb93e7cffc2"
 
-FROM ${DISTROLESS_IMAGE} as runner
+FROM ${DISTROLESS_IMAGE} AS runner
 ARG APP_DIR=/deployment
 ARG UID=1001
 
