@@ -31,5 +31,4 @@ public abstract class ProxyTest {
   protected URI getProxyUri() {
     return Objects.requireNonNull(proxyUri);
   }
-
 }
