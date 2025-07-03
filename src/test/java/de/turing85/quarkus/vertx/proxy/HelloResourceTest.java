@@ -2,6 +2,7 @@ package de.turing85.quarkus.vertx.proxy;
 
 import java.util.List;
 
+import de.turing85.quarkus.vertx.proxy.impl.forwarded.xfport.XFPortInterceptor;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -44,7 +45,8 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_LENGTH, "5")
             .and().header(HttpHeaders.ETAG, helloETag)
             .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_XFPORT, String.valueOf(getProxyUri().getPort()))
             .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
             .and().body(is("hello"));
     // @formatter:on
@@ -68,7 +70,8 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_LENGTH, "0")
             .and().header(HttpHeaders.ETAG, helloETag)
             .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_XFPORT, String.valueOf(getProxyUri().getPort()))
             .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
             .and().body(is(emptyString()));
     // @formatter:on
@@ -92,7 +95,8 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_LENGTH, "5")
             .and().header(HttpHeaders.ETAG, helloETag)
             .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_XFPORT, String.valueOf(getProxyUri().getPort()))
             .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
             .and().body(is("hello"));
     // @formatter:on
@@ -118,7 +122,8 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_LENGTH, "0")
             .and().header(HttpHeaders.ETAG, eTag)
             .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_XFPORT, String.valueOf(getProxyUri().getPort()))
             .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
             .and().body(is(emptyString()));
     // @formatter:on
@@ -144,7 +149,8 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_LENGTH, "5")
             .and().header(HttpHeaders.ETAG, eTag)
             .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_XFPORT, String.valueOf(getProxyUri().getPort()))
             .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
             .and().body(is("hello"));
     // @formatter:on
@@ -164,7 +170,8 @@ class HelloResourceTest extends ProxyTest {
                 .and().header(HttpHeaders.ETAG, notNullValue())
                 .and().header(HttpHeaders.ETAG, not(emptyString()))
                 .and().header(XFPInterceptor.HEADER_XFP, getProxyUri().getScheme())
-                .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getAuthority())
+                .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+                .and().header(XFPortInterceptor.HEADER_XFPORT, String.valueOf(getProxyUri().getPort()))
                 .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
                 .and().body(is("hello"))
             .extract().header(HttpHeaders.ETAG);

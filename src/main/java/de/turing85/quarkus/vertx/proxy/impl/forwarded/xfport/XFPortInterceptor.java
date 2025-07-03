@@ -1,7 +1,4 @@
-package de.turing85.quarkus.vertx.proxy.impl.forwarded.xfh;
-
-import java.net.URI;
-import java.util.Optional;
+package de.turing85.quarkus.vertx.proxy.impl.forwarded.xfport;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -9,29 +6,31 @@ import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
 import io.vertx.httpproxy.ProxyResponse;
 
-public class XFHInterceptor implements ProxyInterceptor {
-  public static final String HEADER_XFH = "X-Forwarded-Host";
+import java.util.Optional;
+
+public class XFPortInterceptor implements ProxyInterceptor {
+  public static final String HEADER_XFPORT = "X-Forwarded-Port";
 
   @Override
   public Future<ProxyResponse> handleProxyRequest(final ProxyContext context) {
     final MultiMap headers = context.request().headers();
-    final String xfhHeader = headers.get(HEADER_XFH);
+    final String xfhHeader = headers.get(HEADER_XFPORT);
     final String updatedXfhHeader;
     if (Optional.ofNullable(xfhHeader).orElse("").isEmpty()) {
-      updatedXfhHeader = context.request().proxiedRequest().authority().host();
-      headers.add(HEADER_XFH, updatedXfhHeader);
+      updatedXfhHeader = String.valueOf(context.request().proxiedRequest().authority().port());
+      headers.add(HEADER_XFPORT, updatedXfhHeader);
     } else {
       updatedXfhHeader = xfhHeader;
     }
-    context.set(HEADER_XFH, updatedXfhHeader);
+    context.set(HEADER_XFPORT, updatedXfhHeader);
     return context.sendRequest();
   }
 
   @Override
   public Future<Void> handleProxyResponse(final ProxyContext context) {
     final MultiMap headers = context.response().headers();
-    if (Optional.ofNullable(headers.get(HEADER_XFH)).orElse("").isEmpty()) {
-      headers.add(HEADER_XFH, context.get(HEADER_XFH, String.class));
+    if (Optional.ofNullable(headers.get(HEADER_XFPORT)).orElse("").isEmpty()) {
+      headers.add(HEADER_XFPORT, context.get(HEADER_XFPORT, String.class));
     }
     return context.sendResponse();
   }
