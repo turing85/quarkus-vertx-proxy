@@ -1,4 +1,4 @@
-package de.turing85.quarkus.vertx.proxy.impl.forwarded.xfp;
+package de.turing85.quarkus.vertx.proxy.impl.forwarded.xfproto;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -7,9 +7,9 @@ import io.vertx.core.Vertx;
 import io.vertx.httpproxy.ProxyInterceptor;
 
 @ApplicationScoped
-public class XFPInterceptorProvider implements ProxyInterceptorProvider {
+public class XFProtoInterceptorProvider implements ProxyInterceptorProvider {
   @Override
   public ProxyInterceptor createInterceptor(Vertx vertx) {
-    return new XFPInterceptor();
+    return new XFProtoInterceptor();
   }
 }

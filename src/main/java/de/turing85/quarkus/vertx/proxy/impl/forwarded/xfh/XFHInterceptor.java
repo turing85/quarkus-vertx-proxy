@@ -1,6 +1,5 @@
 package de.turing85.quarkus.vertx.proxy.impl.forwarded.xfh;
 
-import java.net.URI;
 import java.util.Optional;
 
 import io.vertx.core.Future;
@@ -18,7 +17,7 @@ public class XFHInterceptor implements ProxyInterceptor {
     final String xfhHeader = headers.get(HEADER_XFH);
     final String updatedXfhHeader;
     if (Optional.ofNullable(xfhHeader).orElse("").isEmpty()) {
-      updatedXfhHeader = URI.create(context.request().absoluteURI()).getAuthority();
+      updatedXfhHeader = context.request().proxiedRequest().authority().host();
       headers.add(HEADER_XFH, updatedXfhHeader);
     } else {
       updatedXfhHeader = xfhHeader;
