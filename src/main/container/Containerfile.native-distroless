@@ -1,4 +1,4 @@
-ARG DISTROLESS_IMAGE="quay.io/quarkus/quarkus-distroless-image:2.0-2024-12-29@sha256:5cead26d2ffeed26ee830bdcd829e8e9a56f03879bae35031e4e8fb93e7cffc2"
+ARG DISTROLESS_IMAGE="quay.io/quarkus/quarkus-distroless-image:2.0-2025-07-20@sha256:0f6a2e0da65b3ae06ddfb4f5eff031dff9bed0f331c1b3140f8cb3cdc114d7fe"
 
 FROM ${DISTROLESS_IMAGE} AS runner
 ARG APP_DIR=/deployment
@@ -6,10 +6,6 @@ ARG UID=1001
 
 USER root
 WORKDIR ${APP_DIR}
-# Include if the project has .so that need to be copied:
-# COPY \
-#  --chmod=444 \
-#  target/*.so /lib/
 COPY \
   --chmod=111 \
    target/*-runner ${APP_DIR}/application
