@@ -1,6 +1,7 @@
 package de.turing85.quarkus.resource;
 
 import java.net.URI;
+import java.util.Optional;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -27,7 +28,7 @@ public class HelloResource {
   @GET
   public Uni<Response> get(@QueryParam("eTag") @Nullable final String eTag) {
     final Response.ResponseBuilder response = Response.ok(PATH);
-    if (eTag != null && !eTag.isEmpty()) {
+    if (!Optional.ofNullable(eTag).orElse("").isEmpty()) {
       response.tag(new EntityTag(eTag));
     }
     return Uni.createFrom().item(response.build());

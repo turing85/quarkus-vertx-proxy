@@ -44,10 +44,10 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
             .and().header(HttpHeaders.CONTENT_LENGTH, "5")
             .and().header(HttpHeaders.ETAG, helloETag)
-            .and().header(XFProtoInterceptor.HEADER_XF_PROTO, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
-            .and().header(XFPortInterceptor.HEADER_XF_PORT, String.valueOf(getProxyUri().getPort()))
-            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().header(XFProtoInterceptor.HEADER_NAME, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_NAME, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_NAME, String.valueOf(getProxyUri().getPort()))
+            .and().header(XFFInterceptor.HEADER_NAME, endsWith(", quarkus-vertx-proxy"))
             .and().body(is("hello"));
     // @formatter:on
   }
@@ -69,10 +69,10 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
             .and().header(HttpHeaders.CONTENT_LENGTH, "0")
             .and().header(HttpHeaders.ETAG, helloETag)
-            .and().header(XFProtoInterceptor.HEADER_XF_PROTO, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
-            .and().header(XFPortInterceptor.HEADER_XF_PORT, String.valueOf(getProxyUri().getPort()))
-            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().header(XFProtoInterceptor.HEADER_NAME, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_NAME, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_NAME, String.valueOf(getProxyUri().getPort()))
+            .and().header(XFFInterceptor.HEADER_NAME, endsWith(", quarkus-vertx-proxy"))
             .and().body(is(emptyString()));
     // @formatter:on
   }
@@ -94,10 +94,10 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
             .and().header(HttpHeaders.CONTENT_LENGTH, "5")
             .and().header(HttpHeaders.ETAG, helloETag)
-            .and().header(XFProtoInterceptor.HEADER_XF_PROTO, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
-            .and().header(XFPortInterceptor.HEADER_XF_PORT, String.valueOf(getProxyUri().getPort()))
-            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().header(XFProtoInterceptor.HEADER_NAME, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_NAME, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_NAME, String.valueOf(getProxyUri().getPort()))
+            .and().header(XFFInterceptor.HEADER_NAME, endsWith(", quarkus-vertx-proxy"))
             .and().body(is("hello"));
     // @formatter:on
   }
@@ -121,10 +121,10 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
             .and().header(HttpHeaders.CONTENT_LENGTH, "0")
             .and().header(HttpHeaders.ETAG, eTag)
-            .and().header(XFProtoInterceptor.HEADER_XF_PROTO, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
-            .and().header(XFPortInterceptor.HEADER_XF_PORT, String.valueOf(getProxyUri().getPort()))
-            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().header(XFProtoInterceptor.HEADER_NAME, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_NAME, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_NAME, String.valueOf(getProxyUri().getPort()))
+            .and().header(XFFInterceptor.HEADER_NAME, endsWith(", quarkus-vertx-proxy"))
             .and().body(is(emptyString()));
     // @formatter:on
   }
@@ -148,10 +148,10 @@ class HelloResourceTest extends ProxyTest {
             .and().header(HttpHeaders.CONTENT_ENCODING, nullValue())
             .and().header(HttpHeaders.CONTENT_LENGTH, "5")
             .and().header(HttpHeaders.ETAG, eTag)
-            .and().header(XFProtoInterceptor.HEADER_XF_PROTO, getProxyUri().getScheme())
-            .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
-            .and().header(XFPortInterceptor.HEADER_XF_PORT, String.valueOf(getProxyUri().getPort()))
-            .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+            .and().header(XFProtoInterceptor.HEADER_NAME, getProxyUri().getScheme())
+            .and().header(XFHInterceptor.HEADER_NAME, getProxyUri().getHost())
+            .and().header(XFPortInterceptor.HEADER_NAME, String.valueOf(getProxyUri().getPort()))
+            .and().header(XFFInterceptor.HEADER_NAME, endsWith(", quarkus-vertx-proxy"))
             .and().body(is("hello"));
     // @formatter:on
   }
@@ -170,12 +170,12 @@ class HelloResourceTest extends ProxyTest {
                 .and().header(HttpHeaders.CONTENT_LENGTH, "5")
                 .and().header(HttpHeaders.ETAG, notNullValue())
                 .and().header(HttpHeaders.ETAG, not(emptyString()))
-                .and().header(XFProtoInterceptor.HEADER_XF_PROTO, getProxyUri().getScheme())
-                .and().header(XFHInterceptor.HEADER_XFH, getProxyUri().getHost())
+                .and().header(XFProtoInterceptor.HEADER_NAME, getProxyUri().getScheme())
+                .and().header(XFHInterceptor.HEADER_NAME, getProxyUri().getHost())
                 .and().header(
-                    XFPortInterceptor.HEADER_XF_PORT,
+                    XFPortInterceptor.HEADER_NAME,
                     String.valueOf(getProxyUri().getPort()))
-                .and().header(XFFInterceptor.HEADER_XFF, endsWith(", quarkus-vertx-proxy"))
+                .and().header(XFFInterceptor.HEADER_NAME, endsWith(", quarkus-vertx-proxy"))
                 .and().body(is("hello"))
             .extract().header(HttpHeaders.ETAG);
     // @formatter:on

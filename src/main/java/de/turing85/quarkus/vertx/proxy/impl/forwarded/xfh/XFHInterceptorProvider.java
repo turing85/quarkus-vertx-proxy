@@ -7,7 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.httpproxy.ProxyInterceptor;
 
 @ApplicationScoped
-public class XFHInterceptorProvider implements ProxyInterceptorProvider {
+class XFHInterceptorProvider implements ProxyInterceptorProvider {
   @Override
   public ProxyInterceptor createInterceptor(final Vertx vertx) {
     return new XFHInterceptor();

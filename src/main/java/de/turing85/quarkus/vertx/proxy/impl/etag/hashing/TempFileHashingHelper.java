@@ -10,20 +10,14 @@ import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.OpenOptions;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.httpproxy.Body;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class TempFileHashingHelper implements HashingHelper {
   private final MessageDigest digest;
   private final Vertx vertx;
   private final String path;
   private final AsyncFile file;
-
-  private TempFileHashingHelper(final MessageDigest digest, final Vertx vertx, final String path,
-      final AsyncFile file) {
-    this.digest = digest;
-    this.vertx = vertx;
-    this.path = path;
-    this.file = file;
-  }
 
   public static Future<TempFileHashingHelper> of(final String algorithm, final Vertx vertx) {
     final MessageDigest digest;

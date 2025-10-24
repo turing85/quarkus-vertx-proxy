@@ -7,15 +7,12 @@ import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.httpproxy.Body;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class InMemoryHashingHelper implements HashingHelper {
   private final MessageDigest digest;
   private final Buffer buffer;
-
-  private InMemoryHashingHelper(final MessageDigest digest, final Buffer buffer) {
-    this.digest = digest;
-    this.buffer = buffer;
-  }
 
   public static Future<InMemoryHashingHelper> of(final String algorithm) {
     final MessageDigest digest;

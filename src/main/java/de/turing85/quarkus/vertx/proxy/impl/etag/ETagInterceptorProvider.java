@@ -9,7 +9,7 @@ import io.vertx.httpproxy.ProxyInterceptor;
 
 @Priority(ProxyInterceptorProvider.DEFAULT_PRIORITY + 1)
 @ApplicationScoped
-public class ETagInterceptorProvider implements ProxyInterceptorProvider {
+class ETagInterceptorProvider implements ProxyInterceptorProvider {
   @Override
   public ProxyInterceptor createInterceptor(final Vertx vertx) {
     return new ETagInterceptor(vertx);
