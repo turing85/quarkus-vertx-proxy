@@ -20,7 +20,7 @@
         <impsort-maven-plugin.version>1.13.0</impsort-maven-plugin.version>
         <nullaway.version>0.13.1</nullaway.version>
         <source-plugin.version>3.4.0</source-plugin.version>
-        <surefire-plugin.version>3.5.4</surefire-plugin.version>
+        <surefire-plugin.version>3.5.5</surefire-plugin.version>
 
         <!-- Dependency versions -->
         <jspecify.version>1.0.0</jspecify.version>
