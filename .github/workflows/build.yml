@@ -28,7 +28,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.repository != 'turing85/quarkus-vertx-proxy' }}
 
 permissions:
-  actions: write
   checks: write
   pull-requests: write
 
