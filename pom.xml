@@ -62,7 +62,7 @@
         <quarkus.docker.dockerfile-jvm-path>src/main/container/Containerfile.temurin</quarkus.docker.dockerfile-jvm-path>
         <quarkus.docker.dockerfile-native-path>src/main/container/Containerfile.native-distroless</quarkus.docker.dockerfile-native-path>
         <quarkus-maven-plugin.skip>false</quarkus-maven-plugin.skip>
-        <quarkus.native.builder-image>quay.io/quarkus/ubi-quarkus-mandrel-builder-image:25.0.1.0-Final-java25-2026-01-25@sha256:b720a59a72ac7e472097ab503f201bc38e281b06ded13bc970107ec295367942</quarkus.native.builder-image>
+        <quarkus.native.builder-image>quay.io/quarkus/ubi-quarkus-mandrel-builder-image:25.0.3.0-Final-java25-2026-05-24@sha256:80255d907dcedc1391c1c644479c0f980f39c86e5b76fd0203af5596bff6ea7e</quarkus.native.builder-image>
         <quarkus.native.builder-image.pull>missing</quarkus.native.builder-image.pull>
         <quarkus.native.compression.container-build>true</quarkus.native.compression.container-build>
         <quarkus.native.compression.enabled>false</quarkus.native.compression.enabled>
