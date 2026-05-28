@@ -33,7 +33,7 @@ class ProxyStarter {
     // @formatter:off
     final int proxyHttpPort = proxyConfig.httpPort();
     deployProxyVerticle(vertx, vertxConfiguration, proxyHttpPort, httpPort, prioritySortedProviders)
-        .onSuccess(unused -> Log.infof(
+        .onSuccess(_ -> Log.infof(
             "vert.x proxy started on  http://localhost:%d, forwarding to http://localhost:%d",
             proxyHttpPort, httpPort));
     // @formatter:on

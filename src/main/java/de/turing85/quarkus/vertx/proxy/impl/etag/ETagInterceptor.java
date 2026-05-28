@@ -55,8 +55,8 @@ class ETagInterceptor implements ProxyInterceptor {
     // @formatter:off
     return getHelper(length).compose(helper -> helper
         .process(bodyStream)
-        .compose(unused-> handleETagFromHelper(context, helper))
-        .onComplete(unused -> helper.close()));
+        .compose(_ -> handleETagFromHelper(context, helper))
+        .onComplete(_ -> helper.close()));
     // @formatter:on
   }
 
