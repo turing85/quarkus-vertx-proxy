@@ -53,12 +53,12 @@ public class TempFileHashingHelper implements HashingHelper {
     file.write(data);
     if (file.writeQueueFull()) {
       bodyStream.pause();
-      file.drainHandler(v -> bodyStream.resume());
+      file.drainHandler(_ -> bodyStream.resume());
     }
   }
 
   @Override
   public void close() {
-    file.close().andThen(v -> vertx.fileSystem().delete(path));
+    file.close().andThen(_ -> vertx.fileSystem().delete(path));
   }
 }
